@@ -5,7 +5,7 @@ import (
 )
 
 type DocsParams struct {
-	Login string `form:"login" binding:"required"`
+	Login string `json:"login" uri:"login" binding:"required"`
 }
 
 // UsersHandler provides access to GET /sites end-point
@@ -13,7 +13,7 @@ func UsersHandler(c *gin.Context) {
 	var params DocsParams
 	if err := c.ShouldBindUri(&params); err == nil {
 		user := User{
-			Login: params.Login,
+			LOGIN: params.Login,
 		}
 		u := getUser(_DB, user)
 		c.JSON(200, gin.H{"status": "ok", "user": u})
@@ -38,11 +38,11 @@ func UsersPostHandler(c *gin.Context) {
 	if err == nil {
 		// create new user in DB
 		user := User{
-			Login:     form.Login,
-			FirstName: form.FirstName,
-			LastName:  form.LastName,
-			Password:  form.Password,
-			Email:     form.Email,
+			LOGIN:      form.Login,
+			FIRST_NAME: form.FirstName,
+			LAST_NAME:  form.LastName,
+			PASSWORD:   form.Password,
+			EMAIL:      form.Email,
 		}
 		uid, err := createUser(_DB, user)
 		if err != nil {

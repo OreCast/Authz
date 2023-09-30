@@ -19,6 +19,7 @@ type Configuration struct {
 	LogFile string `json:"log_file"` // server log file
 	Port    int    `json:"port"`     // server port number
 	Verbose int    `json:"verbose"`  // verbose output
+	DbUri   string `json:"dburi"`    // database URI
 
 	// OreCast parts
 	Cipher string `json:"cipher"` // data-discovery cipher
@@ -42,10 +43,13 @@ func parseConfig(configFile string) error {
 
 	// default values
 	if Config.Port == 0 {
-		Config.Port = 8320
+		Config.Port = 8380
 	}
 	if Config.Cipher == "" {
 		Config.Cipher = "aes"
+	}
+	if Config.DbUri == "" {
+		Config.DbUri = "auth.db"
 	}
 	return nil
 }

@@ -19,7 +19,7 @@ func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	// GET routes
-	r.GET("/user/:user", UsersHandler)
+	r.GET("/user/:login", UsersHandler)
 
 	// POST routes
 	r.POST("/user", UsersPostHandler)
@@ -33,6 +33,7 @@ func Server(configFile string) {
 		log.Fatal(err)
 	}
 	_DB = db
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	r := setupRouter()
 	sport := fmt.Sprintf(":%d", Config.Port)
