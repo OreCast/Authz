@@ -6,11 +6,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+
+	"github.com/go-oauth2/oauth2/v4/generates"
+	"github.com/go-oauth2/oauth2/v4/manage"
+	"github.com/go-oauth2/oauth2/v4/models"
+	"github.com/go-oauth2/oauth2/v4/server"
+	"github.com/go-oauth2/oauth2/v4/store"
 )
 
 // examples: https://go.dev/doc/tutorial/web-service-gin
 
+// _DB defines gorm DB pointer
 var _DB *gorm.DB
+
+var _oauthServer *server.Server
 
 // helper function to setup our server router
 func setupRouter() *gin.Engine {
@@ -20,9 +29,11 @@ func setupRouter() *gin.Engine {
 
 	// GET routes
 	r.GET("/user/:login", UsersHandler)
+	r.GET("/oauth/token", TokenHandler)
 
 	// POST routes
 	r.POST("/user", UsersPostHandler)
+	r.POST("/oauth/authorize", AuthzHandler)
 
 	return r
 }
@@ -34,6 +45,31 @@ func Server(configFile string) {
 	}
 	_DB = db
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	// setup oauth parts
+	manager := manage.NewDefaultManager()
+	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
+
+	// token store
+	manager.MustTokenStorage(store.NewMemoryTokenStore())
+
+	// generate jwt access token
+	// manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte("00000000"), jwt.SigningMethodHS512))
+	manager.MapAccessGenerate(generates.NewAccessGenerate())
+
+	clientStore := store.NewClientStore()
+	clientId := "client_id"
+	clientSecret := "client_secret"
+	domain := "http://localhost:8381"
+	clientStore.Set(clientId, &models.Client{
+		ID:     clientId,     // The client id being passed in
+		Secret: clientSecret, // The client secret being passed in
+		Domain: domain,       // The domain of the redirect url
+	})
+	manager.MapClientStorage(clientStore)
+	_oauthServer = server.NewServer(server.NewConfig(), manager)
+	_oauthServer.SetAllowGetAccessRequest(true)
+	_oauthServer.SetClientInfoHandler(server.ClientFormHandler)
 
 	r := setupRouter()
 	sport := fmt.Sprintf(":%d", Config.Port)

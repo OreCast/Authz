@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -19,17 +20,22 @@ type User struct {
 	CREATED    int64  `json:"created" gorm:"autoCreateTime"`       // Use unix seconds as creating time
 }
 
-func getUser(db *gorm.DB, user User) User {
+func getUser(db *gorm.DB, user User) (User, error) {
 	// Get first matched record
 	// SELECT * FROM users WHERE Login = ...
 	var u User
 	cond := fmt.Sprintf("LOGIN = ?")
 	result := db.Where(cond, user.LOGIN).First(&u)
 	//     result := db.First(&u, cond, user.Login)
+	if result.RowsAffected == 0 {
+		msg := fmt.Sprintf("User %s is not found", user.LOGIN)
+		log.Println("ERROR:", msg)
+		return u, errors.New(msg)
+	}
 	if Config.Verbose > 0 {
 		log.Printf("INFO: query user %+v, result %+v, found %+v", user, result, u)
 	}
-	return u
+	return u, nil
 }
 
 func createUser(db *gorm.DB, user User) (uint, error) {
