@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-session/session"
 )
 
 type DocsParams struct {
@@ -78,11 +77,11 @@ func TokenHandler(c *gin.Context) {
 
 // AuthzHandler provides access to POST /oauth/authorize end-point
 func AuthzHandler(c *gin.Context) {
-	//     err := _oauthServer.HandleAuthorizeRequest(c.Writer, c.Request)
-	//     if err != nil {
-	//         log.Println("ERROR: oauth server error", err)
-	//         http.Error(c.Writer, err.Error(), http.StatusBadRequest)
-	//     }
+	store, err := session.Start(c.Request.Context(), c.Writer, c.Request)
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	var params UserParams
 	if err := c.BindJSON(&params); err == nil {
 		user := User{
@@ -90,33 +89,17 @@ func AuthzHandler(c *gin.Context) {
 			PASSWORD: params.Password,
 		}
 		if u, err := getUser(_DB, user); err == nil {
+			store.Set("UserID", u.ID)
+			store.Save()
+
 			err = _oauthServer.HandleAuthorizeRequest(c.Writer, c.Request)
 			if err != nil {
 				log.Println("ERROR: oauth server error", err)
 				http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 			}
+			c.Writer.Header().Set("Location", "/oauth2/authorize")
 			log.Println("INFO: found user", u)
-			authServerURL := "http://localhost:8380"
-			rurl := fmt.Sprintf("%s/oauth/token?client_id=client_id&client_secret=client_secret&grant_type=client_credentials&scope=read", authServerURL)
-			//             rurl := fmt.Sprintf("/oauth/token?client_id=client_id&client_secret=client_secret&grant_type=client_credentials&scope=read")
-			r, e := http.NewRequest("GET", rurl, nil)
-			r.Header.Add("Accept", "application/json")
-			r.Header.Add("Content-type", "application/json")
-			if e == nil {
-				client := http.Client{}
-				resp, err := client.Do(r)
-				if err != nil {
-					log.Println("ERROR: unable to make new HTTP request", rurl, err)
-				} else {
-					log.Println("INFO", resp.Status, resp.StatusCode)
-					defer resp.Body.Close()
-					data, err := io.ReadAll(resp.Body)
-					log.Println("DATA", string(data), err)
-				}
-				//                 http.Redirect(c.Writer, r, rurl, http.StatusFound)
-			} else {
-				log.Println("ERROR: unable to make new HTTP request", r)
-			}
+			c.JSON(200, gin.H{"status": "ok", "uid": u.ID})
 			//             config := oauth2.Config{
 			//                 ClientID:     "client_id",
 			//                 ClientSecret: "client_secret",
