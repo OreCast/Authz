@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
@@ -54,17 +55,16 @@ func Server(configFile string) {
 	manager.MustTokenStorage(store.NewMemoryTokenStore())
 
 	// generate jwt access token
-	// manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte("00000000"), jwt.SigningMethodHS512))
-	manager.MapAccessGenerate(generates.NewAccessGenerate())
+	manager.MapAccessGenerate(
+		generates.NewJWTAccessGenerate(
+			"", []byte(Config.ClientId), jwt.SigningMethodHS512))
+	//     manager.MapAccessGenerate(generates.NewAccessGenerate())
 
 	clientStore := store.NewClientStore()
-	clientId := "client_id"
-	clientSecret := "client_secret"
-	domain := "http://localhost:8381"
-	clientStore.Set(clientId, &models.Client{
-		ID:     clientId,     // The client id being passed in
-		Secret: clientSecret, // The client secret being passed in
-		Domain: domain,       // The domain of the redirect url
+	clientStore.Set(Config.ClientId, &models.Client{
+		ID:     Config.ClientId,     // The client id being passed in
+		Secret: Config.ClientSecret, // The client secret being passed in
+		Domain: Config.Domain,       // The domain of the redirect url
 	})
 	manager.MapClientStorage(clientStore)
 	_oauthServer = server.NewServer(server.NewConfig(), manager)

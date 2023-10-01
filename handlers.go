@@ -98,23 +98,10 @@ func AuthzHandler(c *gin.Context) {
 				http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 			}
 			c.Writer.Header().Set("Location", "/oauth2/authorize")
-			log.Println("INFO: found user", u)
+			if Config.Verbose > 0 {
+				log.Println("INFO: found user", u)
+			}
 			c.JSON(200, gin.H{"status": "ok", "uid": u.ID})
-			//             config := oauth2.Config{
-			//                 ClientID:     "client_id",
-			//                 ClientSecret: "client_secret",
-			//                 Scopes:       []string{"all"},
-			//                 RedirectURL:  "http://localhost:8380/oauth",
-			//                 Endpoint: oauth2.Endpoint{
-			//                     AuthURL:  authServerURL + "/oauth/authorize",
-			//                     TokenURL: authServerURL + "/oauth/token",
-			//                 },
-			//             }
-			//             if token, err := config.PasswordCredentialsToken(context.Background(), u.LOGIN, u.PASSWORD); err == nil {
-			//                 c.JSON(200, gin.H{"status": "ok", "token": token})
-			//             } else {
-			//                 c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
-			//             }
 		} else {
 			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
 		}

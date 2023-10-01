@@ -7,6 +7,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,11 +16,14 @@ import (
 // Configuration stores server configuration parameters
 type Configuration struct {
 	// web server parts
-	Base    string `json:"base"`     // base URL
-	LogFile string `json:"log_file"` // server log file
-	Port    int    `json:"port"`     // server port number
-	Verbose int    `json:"verbose"`  // verbose output
-	DbUri   string `json:"dburi"`    // database URI
+	Base         string `json:"base"`     // base URL
+	LogFile      string `json:"log_file"` // server log file
+	Port         int    `json:"port"`     // server port number
+	Verbose      int    `json:"verbose"`  // verbose output
+	DbUri        string `json:"dburi"`    // database URI
+	ClientId     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	Domain       string `json:"domain"`
 
 	// OreCast parts
 	Cipher string `json:"cipher"` // data-discovery cipher
@@ -50,6 +54,15 @@ func parseConfig(configFile string) error {
 	}
 	if Config.DbUri == "" {
 		Config.DbUri = "auth.db"
+	}
+	if Config.ClientId == "" {
+		Config.ClientId = "client_id"
+	}
+	if Config.ClientSecret == "" {
+		Config.ClientSecret = "client_secret"
+	}
+	if Config.Domain == "" {
+		Config.Domain = fmt.Sprintf("http://localho:%d", Config.Port)
 	}
 	return nil
 }
