@@ -8,8 +8,9 @@ import (
 )
 
 type Response struct {
-	Status string
-	Uid    int
+	Status string `json:"status"`
+	Uid    int    `json:"uid,omitempty"`
+	Error  string `json:"error,omitempty"`
 }
 
 type Claims struct {
