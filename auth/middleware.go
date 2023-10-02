@@ -24,12 +24,12 @@ func TokenMiddleware(clientId string, verbose int) gin.HandlerFunc {
 		if err := token.Validate(clientId); err != nil {
 			msg := fmt.Sprintf("invalid token %s, error %v", tokenStr, err)
 			log.Println("WARNING:", msg)
-			c.Data(http.StatusUnauthorized, "text/html; charset=utf-8", []byte(msg))
+			c.AbortWithStatusJSON(
+				http.StatusUnauthorized, gin.H{"status": "fail", "error": err.Error()})
 			return
-		} else {
-			if verbose > 0 {
-				log.Println("INFO: token is validated")
-			}
+		}
+		if verbose > 0 {
+			log.Println("INFO: token is validated")
 		}
 		c.Next()
 	}
