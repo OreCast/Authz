@@ -33,7 +33,7 @@ func setupRouter() *gin.Engine {
 	r.GET("/oauth/token", TokenHandler)
 
 	// POST routes
-	r.POST("/user", UsersPostHandler)
+	r.POST("/user", RegistryUserHandler)
 	r.POST("/oauth/authorize", AuthzHandler)
 
 	return r

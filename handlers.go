@@ -42,8 +42,8 @@ type UserRequest struct {
 	Email     string `json:"email"`
 }
 
-// UsersPostHandler provides access to POST /sites end-point
-func UsersPostHandler(c *gin.Context) {
+// RegistryUserHandler provides access to POST /user end-point
+func RegistryUserHandler(c *gin.Context) {
 	var form UserRequest
 	err := c.BindJSON(&form)
 	if err == nil {
