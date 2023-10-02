@@ -10,7 +10,7 @@ import (
 
 // User represents user table
 type User struct {
-	ID         uint   `json:"id" gorm:"primaryKey"`
+	ID         uint   `json:"id" gorm:"primaryKey,autoIncrement	"`
 	LOGIN      string `json:"login"`
 	FIRST_NAME string `json:"first_name"`
 	LAST_NAME  string `json:"last_name"`
