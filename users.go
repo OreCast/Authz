@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	oreConfig "github.com/OreCast/common/config"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +33,7 @@ func getUser(db *gorm.DB, user User) (User, error) {
 		log.Println("ERROR:", msg)
 		return u, errors.New(msg)
 	}
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Authz.WebServer.Verbose > 0 {
 		log.Printf("INFO: query user %+v, result %+v, found %+v", user, result, u)
 	}
 	return u, nil

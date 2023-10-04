@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	oreConfig "github.com/OreCast/common/config"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -39,7 +40,7 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
-func Server(configFile string) {
+func Server() {
 	db, err := initDB("sqlite")
 	if err != nil {
 		log.Fatal(err)
@@ -57,14 +58,14 @@ func Server(configFile string) {
 	// generate jwt access token
 	manager.MapAccessGenerate(
 		generates.NewJWTAccessGenerate(
-			"", []byte(Config.ClientId), jwt.SigningMethodHS512))
+			"", []byte(oreConfig.Config.Authz.ClientId), jwt.SigningMethodHS512))
 	//     manager.MapAccessGenerate(generates.NewAccessGenerate())
 
 	clientStore := store.NewClientStore()
-	clientStore.Set(Config.ClientId, &models.Client{
-		ID:     Config.ClientId,     // The client id being passed in
-		Secret: Config.ClientSecret, // The client secret being passed in
-		Domain: Config.Domain,       // The domain of the redirect url
+	clientStore.Set(oreConfig.Config.Authz.ClientId, &models.Client{
+		ID:     oreConfig.Config.Authz.ClientId,
+		Secret: oreConfig.Config.Authz.ClientSecret,
+		Domain: oreConfig.Config.Authz.Domain,
 	})
 	manager.MapClientStorage(clientStore)
 	_oauthServer = server.NewServer(server.NewConfig(), manager)
@@ -72,7 +73,7 @@ func Server(configFile string) {
 	_oauthServer.SetClientInfoHandler(server.ClientFormHandler)
 
 	r := setupRouter()
-	sport := fmt.Sprintf(":%d", Config.Port)
+	sport := fmt.Sprintf(":%d", oreConfig.Config.Authz.WebServer.Port)
 	log.Printf("Start HTTP server %s", sport)
 	r.Run(sport)
 }

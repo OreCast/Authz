@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	oreConfig "github.com/OreCast/common/config"
 	"github.com/gin-gonic/gin"
 	"github.com/go-session/session"
 )
@@ -98,7 +99,7 @@ func AuthzHandler(c *gin.Context) {
 				http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 			}
 			c.Writer.Header().Set("Location", "/oauth2/authorize")
-			if Config.Verbose > 0 {
+			if oreConfig.Config.Authz.WebServer.Verbose > 0 {
 				log.Println("INFO: found user", u)
 			}
 			c.JSON(200, gin.H{"status": "ok", "uid": u.ID})
