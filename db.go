@@ -23,9 +23,9 @@ func initDB(dbKind string) (*gorm.DB, error) {
 	if dbKind == "mysql" {
 		// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 		//         dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-		db, err = gorm.Open(mysql.Open(oreConfig.Config.Authz.DbUri), dbConfig)
+		db, err = gorm.Open(mysql.Open(oreConfig.Config.Authz.DBUri), dbConfig)
 	} else if dbKind == "sqlite" {
-		db, err = gorm.Open(sqlite.Open(oreConfig.Config.Authz.DbUri), dbConfig)
+		db, err = gorm.Open(sqlite.Open(oreConfig.Config.Authz.DBUri), dbConfig)
 	} else {
 		return nil, errors.New("Unsupported database")
 	}
