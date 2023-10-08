@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	oreConfig "github.com/OreCast/common/config"
 	"github.com/gin-gonic/gin"
@@ -69,11 +71,38 @@ func RegistryUserHandler(c *gin.Context) {
 
 // TokenHandler provides access to GET /oauth/token end-point
 func TokenHandler(c *gin.Context) {
-	err := _oauthServer.HandleTokenRequest(c.Writer, c.Request)
+	/*
+		err := _oauthServer.HandleTokenRequest(c.Writer, c.Request)
+		if err != nil {
+			log.Println("ERROR: oauth server error", err)
+			http.Error(c.Writer, err.Error(), http.StatusBadRequest)
+		}
+	*/
+
+	// here is the same logic of _oauthServer.HandleTokenRequest
+	// TODO: we may change token attributes as expires, scope, etc.
+	grantType, tokenGenRequest, err := _oauthServer.ValidationTokenRequest(c.Request)
 	if err != nil {
 		log.Println("ERROR: oauth server error", err)
 		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 	}
+
+	tokenInfo, err := _oauthServer.GetAccessToken(c, grantType, tokenGenRequest)
+	if err != nil {
+		log.Println("ERROR: oauth server error", err)
+		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
+	}
+	// set custom token attributes
+	duration := oreConfig.Config.Authz.TokenExpires
+	if duration > 0 {
+		tokenInfo.SetCodeExpiresIn(time.Duration(duration))
+	}
+	data := _oauthServer.GetTokenData(tokenInfo)
+
+	// encode given token token data back to http response writer
+	enc := json.NewEncoder(c.Writer)
+	enc.SetIndent("", "  ")
+	enc.Encode(data)
 }
 
 // AuthzHandler provides access to POST /oauth/authorize end-point
