@@ -1,16 +1,16 @@
 module github.com/OreCast/Authz
 
-go 1.21.2
+go 1.21.3
 
 require (
-	github.com/OreCast/common/config v0.0.0-20231008113920-e5b3f8d8b2d9
+	github.com/OreCast/common/config v0.0.0-20231023133551-89831eb1dae5
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-oauth2/oauth2/v4 v4.5.2
 	github.com/go-session/session v3.1.2+incompatible
-	gorm.io/driver/mysql v1.5.1
+	gorm.io/driver/mysql v1.5.2
 	gorm.io/driver/sqlite v1.5.4
-	gorm.io/gorm v1.25.4
+	gorm.io/gorm v1.25.5
 )
 
 require (
